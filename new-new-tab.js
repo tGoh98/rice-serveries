@@ -8,7 +8,7 @@ var reloadMin = 5 //number of minutes to wait between reloads
 var allServeries = {Baker:baker, SidRich: sid, South: south, West: west, North: north, Seibel: seibel};
 var noFoodMessage = "There is no menu available yet on dining.rice.edu."
 //const food = "East West"
-const food = "Tempeh"
+const food = "East West"
 
 
 $(function(){
@@ -66,8 +66,9 @@ function initialServeryUpdate(){
     });
 }
 function serveryUpdate(servery){
-    //set current time, and good-morning/afternoon, and image
-    setTimeDaytimeImage();
+    //set current time, and good-morning/afternoon
+    //image now changed to be set when reading in the menu
+    setTimeDaytime();
     //Set servery header and local storage equal to servName
     let servName = servery.getName();
     if(servName == "SidRich"){
@@ -113,6 +114,7 @@ function serveryUpdate(servery){
                 let serveriesDict = {}
                 var numServeriesWithFood = 0; //track # serv displaying food
 
+                var boba = false;
                 for (var i = 0; i < serveriesLength; i++) {
                     let thisServery = searchServeries(serveriesStr[i], data);
                     if(thisServery){
@@ -123,11 +125,13 @@ function serveryUpdate(servery){
                         //CHECK FOR FREE BOBA
                         for (var j = 0; j < thisServery.length; j++) {
                           if (thisServery[j].includes(food)) {
-                            setBackgroundImage('Images/skyspace-boba.png');
+                            boba = true;
                           }
                         }
                     }
                 }
+                setImage(boba);
+
                 //update with new promptMessage in hHML, and save in Chrome Storage
                 promptMessage = generatePrompt(data, numServeriesWithFood);
                 $('#prompt').text(promptMessage);
@@ -162,6 +166,7 @@ function serveryUpdate(servery){
 
             serveriesStr = ["Baker", "Seibel", "SidRich", "North", "South", "West"];
             //CHECK FOR FREE BOBA
+            var boba = false;
             for (var i = 0; i < serveriesStr.length; i++) {
                 let thisServery = serveriesDict[serveriesStr[i]];
                 if(thisServery != undefined){
@@ -169,11 +174,12 @@ function serveryUpdate(servery){
 
                     for (var j = 0; j < thisServery.length; j++) {
                       if (thisServery[j].includes(food)) {
-                        setBackgroundImage('Images/skyspace-boba.png');
+                        boba = true;
                       }
                     }
                 }
             }
+            setImage(boba);
 
             if(serveriesDict[servName]){
                 var foodList = serveriesDict[servName]; //foods in array form
@@ -269,8 +275,39 @@ function searchServeries(serveryStr, data){
         //console.log(serveryStr + " closed");
     }
 }
-
-function setTimeDaytimeImage(){
+function setImage(boba){
+  //Set image
+  if (boba) {
+    //BOBA
+    setBackgroundImage('Images/skyspace-boba.png');
+  }
+  else if(hour24>=8 && hour24<14){
+      //brochstein
+      setBackgroundImage('Images/moody.jpg');
+  }
+  else if(hour24>=14 && hour24 < 18){
+      //front-entrance
+      setBackgroundImage('Images/skyspace.jpg');
+  }
+  else if(hour24>=18 && hour24<22){
+      //mild-nighttime
+      setBackgroundImage('Images/mild-nighttime.jpg');
+  }
+  else if ((hour24>=22 && hour24<24) || hour24<2){
+      //dark-nighttime-lovett-hall
+      setBackgroundImage('Images/dark-nighttime-lovett-hall.jpg');
+  }
+  else if(hour24>=2 && hour24 < 8){
+      // misty-halloween
+      setBackgroundImage('Images/misty-halloween.jpg');
+  }
+  else{
+      //mild-nighttime
+      setBackgroundImage('Images/mild-nighttime.jpg');
+      console.log("Error. The proper background image is not loading. Please email pm28@rice.edu with a screenshot and the time.");
+  }
+}
+function setTimeDaytime(){
     /*
     Set the current time
     */
@@ -315,35 +352,8 @@ function setTimeDaytimeImage(){
         timeOfDay = "Evening";
     }
     $('#daytime').text("Good "+timeOfDay);
-
-    //Set image
-
-    if(hour24>=8 && hour24<14){
-        //brochstein
-        setBackgroundImage('Images/moody.jpg');
-    }
-    else if(hour24>=14 && hour24 < 18){
-        //front-entrance
-        setBackgroundImage('Images/skyspace.jpg');
-    }
-    else if(hour24>=18 && hour24<22){
-        //mild-nighttime
-        setBackgroundImage('Images/mild-nighttime.jpg');
-    }
-    else if ((hour24>=22 && hour24<24) || hour24<2){
-        //dark-nighttime-lovett-hall
-        setBackgroundImage('Images/dark-nighttime-lovett-hall.jpg');
-    }
-    else if(hour24>=2 && hour24 < 8){
-        // misty-halloween
-        setBackgroundImage('Images/misty-halloween.jpg');
-    }
-    else{
-        //mild-nighttime
-        setBackgroundImage('Images/mild-nighttime.jpg');
-        console.log("Error. The proper background image is not loading. Please email pm28@rice.edu with a screenshot and the time.");
-    }
 }
+
 function setBackgroundImage(imageUrl){
     $('#bg').css('background-image', 'url(' + imageUrl + ')');
 }
