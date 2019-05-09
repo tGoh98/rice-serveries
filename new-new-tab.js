@@ -7,7 +7,8 @@ const seibel = new Servery("Seibel", {"Friday": true, "Saturday": true, "Sunday"
 var reloadMin = 5 //number of minutes to wait between reloads
 var allServeries = {Baker:baker, SidRich: sid, South: south, West: west, North: north, Seibel: seibel};
 var noFoodMessage = "There is no menu available yet on dining.rice.edu."
-const food = "East West"
+//const food = "East West"
+const food = "Tempeh"
 
 
 $(function(){
@@ -122,7 +123,7 @@ function serveryUpdate(servery){
                         //CHECK FOR FREE BOBA
                         for (var j = 0; j < thisServery.length; j++) {
                           if (thisServery[j].includes(food)) {
-                            setBackgroundImage('Images/skyspace.jpg');
+                            setBackgroundImage('Images/skyspace-boba.png');
                           }
                         }
                     }
@@ -168,7 +169,7 @@ function serveryUpdate(servery){
 
                     for (var j = 0; j < thisServery.length; j++) {
                       if (thisServery[j].includes(food)) {
-                        setBackgroundImage('Images/skyspace.jpg');
+                        setBackgroundImage('Images/skyspace-boba.png');
                       }
                     }
                 }
