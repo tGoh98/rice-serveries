@@ -7,6 +7,8 @@ const seibel = new Servery("Seibel", {"Friday": true, "Saturday": true, "Sunday"
 var reloadMin = 5 //number of minutes to wait between reloads
 var allServeries = {Baker:baker, SidRich: sid, South: south, West: west, North: north, Seibel: seibel};
 var noFoodMessage = "There is no menu available yet on dining.rice.edu."
+const food = "East West"
+
 
 $(function(){
     // serveryUpdate(baker);
@@ -50,13 +52,13 @@ $(function(){
     Mousetrap.bind('r', function(){serveryUpdate(sid);});
     Mousetrap.bind('t', function(){serveryUpdate(south);});
     Mousetrap.bind('y', function(){serveryUpdate(west);});
-    
+
 });
 function initialServeryUpdate(){
     chrome.storage.sync.get(['servery'], function(result) {
         if(result.servery){
             serveryUpdate(allServeries[result.servery]);
-        } 
+        }
         else{
             serveryUpdate(seibel);
         }
@@ -101,7 +103,7 @@ function serveryUpdate(servery){
         xhr.onreadystatechange = function() {
             if(xhr.readyState === 4 && xhr.status === 200) {
                 //readyState = 4 says "request finished and response is ready"
-                //status = 200 says "oK" 
+                //status = 200 says "oK"
                 let parser = new DOMParser();
                 let data = parser.parseFromString(xhr.responseText, "text/html");
 
@@ -116,6 +118,13 @@ function serveryUpdate(servery){
                         serveriesDict[ serveriesStr[i] ] = thisServery;
                         //if servery is open, add 1 to counter
                         numServeriesWithFood += 1;
+
+                        //CHECK FOR FREE BOBA
+                        for (var j = 0; j < thisServery.length; j++) {
+                          if (thisServery[j].includes(food)) {
+                            setBackgroundImage('Images/skyspace.jpg');
+                          }
+                        }
                     }
                 }
                 //update with new promptMessage in hHML, and save in Chrome Storage
@@ -124,7 +133,7 @@ function serveryUpdate(servery){
                 var whichMeal = genWhichMeal(data, numServeriesWithFood);
                 $('#which-meal').text(whichMeal);
                 //save promptMessage and serveriesDict in chrome storage
-                
+
                 chrome.storage.sync.set({'servery_menus': serveriesDict, prompt: promptMessage,
                                         meal: whichMeal}, function() {
                     var foodString = ""; //foodList converted to string
@@ -145,21 +154,37 @@ function serveryUpdate(servery){
 
         localStorage["time"] = timeNow;
     }
-    else{ 
+    else{
         let foodString = ""; //foodList converted to string
         chrome.storage.sync.get(['servery_menus'], function(result) {
             let serveriesDict = result.servery_menus;
+
+            serveriesStr = ["Baker", "Seibel", "SidRich", "North", "South", "West"];
+            //CHECK FOR FREE BOBA
+            for (var i = 0; i < serveriesStr.length; i++) {
+                let thisServery = serveriesDict[serveriesStr[i]];
+                if(thisServery != undefined){
+                    serveriesDict[ serveriesStr[i] ] = thisServery;
+
+                    for (var j = 0; j < thisServery.length; j++) {
+                      if (thisServery[j].includes(food)) {
+                        setBackgroundImage('Images/skyspace.jpg');
+                      }
+                    }
+                }
+            }
+
             if(serveriesDict[servName]){
                 var foodList = serveriesDict[servName]; //foods in array form
                 foodString = capFirstLetter(foodList, foodString);
             }
-            
+
             if(foodString == ""){
                 foodString = noFoodMessage;
             }
             $('#list-of-foods').html(foodString);
         });
-        
+
     }
 };
 function capFirstLetter(foodList, foodString){
@@ -196,15 +221,15 @@ function genWhichMeal(data, numServeriesWithFood){
     }
     //return ": Dinner" or ": Lunch"
     return whichMeal;
-    
+
 }
 
 function generatePrompt(data, numServeriesWithFood){
 
     let promptMessage = "";
-    
+
     //if at least one servery is open based on timing, AND dining.rice shows >=1 servery's food
-    // console.log(!baker.isOpen()[0] && !sid.isOpen()[0] && !south.isOpen()[0] && !west.isOpen()[0] 
+    // console.log(!baker.isOpen()[0] && !sid.isOpen()[0] && !south.isOpen()[0] && !west.isOpen()[0]
     // && !north.isOpen()[0] && !seibel.isOpen()[0]);
     if(!allServeriesClosed() && numServeriesWithFood > 0 ){
         promptMessage = "What would you like to eat today? ";
@@ -216,7 +241,7 @@ function generatePrompt(data, numServeriesWithFood){
     }
 
     //console.log("Number serveries open: " + numServeriesWithFood);
-    
+
     $('#prompt').text(promptMessage);
     return promptMessage;
 }
@@ -224,7 +249,7 @@ function allServeriesClosed(){
     //based on TIME
     //return True if *all* serveries are closed
     //return False if at least 1 is closed
-    return (!baker.isOpen()[0] && !sid.isOpen()[0] && !south.isOpen()[0] && !west.isOpen()[0] 
+    return (!baker.isOpen()[0] && !sid.isOpen()[0] && !south.isOpen()[0] && !west.isOpen()[0]
     && !north.isOpen()[0] && !seibel.isOpen()[0]);
 }
 
@@ -238,7 +263,7 @@ function searchServeries(serveryStr, data){
             foodArray.push(item.textContent);
         }
         return foodArray;
-        
+
     } else {
         //console.log(serveryStr + " closed");
     }
@@ -291,7 +316,7 @@ function setTimeDaytimeImage(){
     $('#daytime').text("Good "+timeOfDay);
 
     //Set image
-    
+
     if(hour24>=8 && hour24<14){
         //brochstein
         setBackgroundImage('Images/moody.jpg');
