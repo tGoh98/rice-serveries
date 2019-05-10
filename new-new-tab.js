@@ -277,6 +277,8 @@ function searchServeries(serveryStr, data){
 }
 function setImage(boba){
   //Set image
+  var d = new Date();
+  let hour24 = d.getHours();
   if (boba) {
     //BOBA
     setBackgroundImage('Images/skyspace-boba.png');
